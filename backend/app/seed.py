@@ -34,7 +34,7 @@ def ensure_encryption_key() -> None:
     get_settings.cache_clear()
 
 
-DEMO_USER_EMAIL = "user"
+DEMO_USER_EMAIL = "user@user.com"
 DEMO_USER_PASSWORD = "user"
 
 DEMO_CONNECTION = {

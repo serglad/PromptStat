@@ -29,7 +29,7 @@ users/orders) и read-only роль `promptstat_ro` / `ro_pass_42`:
 sudo -u postgres psql -f example/init_example_db.sql
 ```
 
-При запуске backend создаёт демо-аккаунт — логин `user`, пароль `user` —
+При запуске backend создаёт демо-аккаунт — логин `user@user.com`, пароль `user` —
 с преднастроенным подключением к `demo_app` (статус `active`, если пример БД
 существует, иначе `inactive`; исправьте или удалите его в интерфейсе). `ENCRYPTION_KEY`
 автоматически генерируется в `backend/.env` при первом запуске, если не настроена.
