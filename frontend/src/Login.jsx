@@ -37,7 +37,13 @@ export default function Login({ onSuccess }) {
         </label>
         <label>
           Пароль
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={mode === 'register' ? 6 : undefined}
+          />
         </label>
         <button type="submit" disabled={busy}>
           {busy ? 'Подождите…' : mode === 'login' ? 'Войти' : 'Зарегистрироваться'}
