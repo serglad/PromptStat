@@ -1,16 +1,16 @@
-# Example database
+# Пример базы данных
 
-`init_example_db.sql` creates a seeded example Postgres database (`demo_app`:
-`users` + `orders`, 200 users, 800 orders) and a read-only role
+`init_example_db.sql` создаёт наполненную пример БД Postgres (`demo_app`:
+`users` + `orders`, 200 пользователей, 800 заказов) и read-only роль
 `promptstat_ro` / `ro_pass_42`.
 
-Create it on your Postgres server:
+Создайте её на своём сервере Postgres:
 
 ```bash
 sudo -u postgres psql -f example/init_example_db.sql
 ```
 
-The backend seeds a demo user (`user` / `user`) with a connection to this
-database automatically on first start (localhost:5432). If the database is
-not reachable, the seeded connection gets status `inactive` and you can fix
-or delete it from the UI.
+Backend автоматически создаёт демо-пользователя (`user` / `user`) с подключением
+к этой базе при первом запуске (localhost:5432). Если база недоступна,
+созданное подключение получает статус `inactive`, и вы можете исправить
+или удалить его из интерфейса.

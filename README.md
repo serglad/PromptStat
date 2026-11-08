@@ -1,40 +1,40 @@
-# PromptStat (MVP prototype)
+# PromptStat (MVP-прототип)
 
-Ask questions in Russian about a live PostgreSQL database, get a table, a chart, and the generated SQL.
+Задавайте вопросы на русском о живой базе PostgreSQL и получайте таблицу, график и сгенерированный SQL.
 
-**MVP scope (hard-verified):** Postgres connection + schema extraction · prompt → SQL → table · auto chart + SQL display. Nothing else.
+**Объём MVP (жёстко верифицирован):** подключение к Postgres + съём схемы · промпт → SQL → таблица · автографик + показ SQL. Ничего больше.
 
-## Stack
+## Стек
 
-- Backend: Python 3.12, FastAPI, SQLAlchemy, SQLite (internal metadata DB)
+- Backend: Python 3.12, FastAPI, SQLAlchemy, SQLite (внутренняя БД метаданных)
 - Frontend: React 18 + Vite + Chart.js
-- LLM: any OpenAI-compatible API (`LLM_API_URL` / `LLM_API_KEY` / `LLM_MODEL`)
-- SQL safety: pglast (libpg_query) parse → single SELECT/WITH-SELECT only, denylisted functions, read-only transaction, timeouts, row limit
-- Client Postgres access: read-only role required
+- LLM: любой OpenAI-совместимый API (`LLM_API_URL` / `LLM_API_KEY` / `LLM_MODEL`)
+- Безопасность SQL: разбор pglast (libpg_query) → только единственный SELECT/WITH-SELECT, функции из denylist запрещены, read-only транзакция, таймауты, лимит строк
+- Доступ к клиентской Postgres: обязательна read-only роль
 
-## Layout
+## Структура
 
 ```
-backend/    FastAPI app + tests (run_tests.sh)
-frontend/   React SPA (Vite); production build served by FastAPI itself
-.env.example  all configuration variables
+backend/    FastAPI-приложение + тесты (run_tests.sh)
+frontend/   React SPA (Vite); продакшен-сборку отдаёт сам FastAPI
+.env.example  все переменные конфигурации
 ```
 
-## Example database + demo user
+## Пример базы + демо-пользователь
 
-`example/init_example_db.sql` creates a seeded Postgres demo DB (`demo_app`:
-users/orders) and a read-only role `promptstat_ro` / `ro_pass_42`:
+`example/init_example_db.sql` создаёт наполненную демо-базу Postgres (`demo_app`:
+users/orders) и read-only роль `promptstat_ro` / `ro_pass_42`:
 
 ```bash
 sudo -u postgres psql -f example/init_example_db.sql
 ```
 
-On startup the backend seeds a demo account — login `user`, password `user` —
-with a connection to `demo_app` preconfigured (status `active` if the example
-DB exists, otherwise `inactive`; fix or delete it in the UI). `ENCRYPTION_KEY`
-is auto-generated into `backend/.env` on first start if not configured.
+При запуске backend создаёт демо-аккаунт — логин `user`, пароль `user` —
+с преднастроенным подключением к `demo_app` (статус `active`, если пример БД
+существует, иначе `inactive`; исправьте или удалите его в интерфейсе). `ENCRYPTION_KEY`
+автоматически генерируется в `backend/.env` при первом запуске, если не настроена.
 
-## Run locally (development)
+## Локальный запуск (разработка)
 
 Backend:
 
@@ -42,13 +42,13 @@ Backend:
 cd backend
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-cp ../.env.example .env        # then fill in ENCRYPTION_KEY, JWT_SECRET, LLM_* values
-# generate keys:
+cp ../.env.example .env        # затем заполните ENCRYPTION_KEY, JWT_SECRET, значения LLM_*
+# сгенерировать ключи:
 #   .venv/bin/python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 .venv/bin/python -m uvicorn app.main:app --reload --port 8000
 ```
 
-Frontend (dev, with API proxy):
+Frontend (dev, с прокси API):
 
 ```bash
 cd frontend
@@ -56,34 +56,34 @@ npm install
 npm run dev                    # http://localhost:5173
 ```
 
-## Run as one service (production-like, single port)
+## Запуск одним сервисом (продакшен-режим, один порт)
 
 ```bash
 cd frontend && npm run build && cd ..
 cd backend && .venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-FastAPI serves the built SPA from `frontend/dist` plus the API on `/api/*`.
-That single command is all a VPS needs (put it behind nginx/Caddy for TLS).
+FastAPI отдаёт собранную SPA из `frontend/dist` плюс API на `/api/*`.
+Этой одной команды достаточно для VPS (поставьте перед ней nginx/Caddy для TLS).
 
-## Tests
+## Тесты
 
 ```bash
-cd backend && ./run_tests.sh          # 46 tests, no network, no Postgres needed
+cd backend && ./run_tests.sh          # 46 тестов, без сети, Postgres не требуется
 ```
 
-## Security notes
+## Примечания по безопасности
 
-- Connection passwords are Fernet-encrypted (`ENCRYPTION_KEY`), never returned by the API, never logged.
-- Only one SQL statement is executed, only SELECT / WITH…SELECT; DML, DDL, COPY, CALL, DO, SET, locking clauses, SELECT INTO, data-modifying CTEs and dangerous functions (`pg_sleep`, `dblink`, `lo_import`, `pg_read_file`, …) are rejected.
-- Queries run in `READ ONLY` transactions with `statement_timeout` (30 s), `lock_timeout`, `idle_in_transaction_session_timeout`, and a row limit (default 1000; excess → `truncated: true`).
-- The LLM receives schema + question (+ previous question/SQL in a conversation) — never raw data rows.
-- Query history stores metadata only; result rows live in memory during the request only.
+- Пароли подключений шифруются Fernet (`ENCRYPTION_KEY`), никогда не возвращаются API и не попадают в логи.
+- Выполняется ровно один SQL-запрос, только SELECT / WITH…SELECT; DML, DDL, COPY, CALL, DO, SET, блокирующие конструкции, SELECT INTO, изменяющие CTE и опасные функции (`pg_sleep`, `dblink`, `lo_import`, `pg_read_file`, …) отклоняются.
+- Запросы выполняются в транзакциях `READ ONLY` с `statement_timeout` (30 с), `lock_timeout`, `idle_in_transaction_session_timeout` и лимитом строк (по умолчанию 1000; сверх лимита → `truncated: true`).
+- В LLM отправляются схема + вопрос (+ предыдущий вопрос/SQL в диалоге) — никогда сырые строки данных.
+- История запросов хранит только метаданные; строки результатов живут в памяти только на время запроса.
 
-## Config
+## Конфигурация
 
-See `.env.example` — every knob is an env var (LLM provider/URL/model/timeouts, schema token budget, row limit, DB timeouts, cache TTL, rate limits).
+См. `.env.example` — каждая настройка является переменной окружения (провайдер/URL/модель/таймауты LLM, бюджет токенов схемы, лимит строк, таймауты БД, TTL кэша, rate limits).
 
-## Out of scope (deliberately)
+## Вне объёма (осознанно)
 
-Other DBs, dashboard builder, SSO, write access, billing, alerts, custom models, on-prem packaging, queues/workers.
+Другие СУБД, конструктор дашбордов, SSO, запись в базу, биллинг, алерты, собственные модели, on-prem-упаковка, очереди/воркеры.
