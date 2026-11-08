@@ -40,6 +40,8 @@ export const api = {
   listConnections: () => request('/api/v1/connections'),
   createConnection: (data) =>
     request('/api/v1/connections', { method: 'POST', body: JSON.stringify(data) }),
+  deleteConnection: (id) =>
+    request(`/api/v1/connections/${id}`, { method: 'DELETE' }),
   getSchema: (id, refresh = false) =>
     request(`/api/v1/connections/${id}/schema?refresh=${refresh}`),
   query: (connectionId, prompt, conversationId) =>

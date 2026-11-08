@@ -10,6 +10,7 @@ export default function Connections({ onGoToQuestions }) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
 
   const load = async () => {
     try {
@@ -41,6 +42,20 @@ export default function Connections({ onGoToQuestions }) {
   }
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })
+
+  const remove = async (c) => {
+    if (!window.confirm(`Удалить подключение «${c.name}»? История запросов по нему тоже будет удалена.`)) return
+    setError('')
+    setDeletingId(c.id)
+    try {
+      await api.deleteConnection(c.id)
+      await load()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   return (
     <div className="two-col">
@@ -74,6 +89,16 @@ export default function Connections({ onGoToQuestions }) {
               <b>{c.name}</b>
               <span className="muted"> · {c.host}:{c.port}/{c.db_name}</span>
               <span className={`status ${c.status}`}>{c.status}</span>
+              <button
+                type="button"
+                className="danger-icon"
+                title="Удалить подключение"
+                aria-label={`Удалить подключение ${c.name}`}
+                disabled={deletingId !== null}
+                onClick={() => remove(c)}
+              >
+                ✕
+              </button>
             </li>
           ))}
         </ul>

@@ -40,6 +40,12 @@ button:disabled { opacity: 0.55; cursor: default; }
 button.nav { background: transparent; color: var(--text); }
 button.nav.active { background: var(--accent); color: #fff; }
 button.link { background: none; color: var(--accent); padding: 2px 4px; text-decoration: underline; }
+button.danger-icon {
+  margin-left: auto; background: none; color: var(--danger);
+  border: 1px solid var(--danger); border-radius: 6px;
+  padding: 2px 9px; font-size: 14px; line-height: 1.4;
+}
+button.danger-icon:hover { background: #fdecec; }
 
 input, select, textarea {
   width: 100%; padding: 8px 10px; border: 1px solid var(--border);

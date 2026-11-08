@@ -81,6 +81,17 @@ def list_connections(
     return [_to_out(c) for c in conns]
 
 
+@router.delete("/{connection_id}", status_code=204)
+def delete_connection(
+    connection_id: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    conn = get_owned_connection(db, user, connection_id)
+    db.delete(conn)
+    db.commit()
+
+
 @router.get("/{connection_id}/schema", response_model=SchemaResponse)
 def get_schema(
     connection_id: str,

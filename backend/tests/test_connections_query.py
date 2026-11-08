@@ -60,6 +60,40 @@ def test_schema_unknown_connection(auth_client):
     assert r.json()["error_code"] == "CONNECTION_NOT_FOUND"
 
 
+def test_delete_connection_removes_related_rows(auth_client, fake_connection, monkeypatch):
+    from app.db import SessionLocal
+    from app.models import Connection, QueryHistory, SchemaSnapshot
+
+    auth_client.get(f"/api/v1/connections/{fake_connection}/schema")
+
+    r = auth_client.delete(f"/api/v1/connections/{fake_connection}")
+    assert r.status_code == 204
+
+    assert auth_client.get("/api/v1/connections").json() == []
+
+    with SessionLocal() as db:
+        assert db.get(Connection, fake_connection) is None
+        assert db.query(SchemaSnapshot).filter(SchemaSnapshot.connection_id == fake_connection).count() == 0
+        assert db.query(QueryHistory).filter(QueryHistory.connection_id == fake_connection).count() == 0
+
+
+def test_delete_unknown_connection(auth_client):
+    r = auth_client.delete("/api/v1/connections/00000000-0000-0000-0000-000000000000")
+    assert r.status_code == 404
+    assert r.json()["error_code"] == "CONNECTION_NOT_FOUND"
+
+
+def test_delete_connection_of_other_user_is_not_found(auth_client, fake_connection):
+    r = auth_client.post("/api/v1/auth/register", json={"email": "other@test.dev", "password": "secret123"})
+    token = r.json()["token"]
+    r = auth_client.delete(
+        f"/api/v1/connections/{fake_connection}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert r.status_code == 404
+    assert auth_client.get("/api/v1/connections").json()[0]["id"] == fake_connection
+
+
 def test_query_validation_errors(auth_client, fake_connection):
     r = auth_client.post("/api/v1/query", json={"connection_id": "not-a-uuid", "prompt": "x"})
     assert r.status_code == 422
