@@ -61,7 +61,7 @@ export default function Workspace({ onManageConnections }) {
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Задайте вопрос к базе на русском"
+            placeholder="Задайте запрос к базе"
             maxLength={2000}
             rows={2}
           />

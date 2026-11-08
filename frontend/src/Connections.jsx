@@ -103,7 +103,7 @@ export default function Connections({ onGoToQuestions }) {
           ))}
         </ul>
         {items.length > 0 && (
-          <button onClick={onGoToQuestions}>Перейти к вопросам</button>
+          <button onClick={onGoToQuestions}>Перейти к запросам</button>
         )}
       </div>
     </div>

@@ -26,7 +26,7 @@ export default function App() {
             className={view === 'workspace' ? 'nav active' : 'nav'}
             onClick={() => setView('workspace')}
           >
-            Вопросы
+            Запросы
           </button>
           <button
             className={view === 'connections' ? 'nav active' : 'nav'}

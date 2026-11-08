@@ -29,7 +29,7 @@ export default function Login({ onSuccess }) {
     <div className="login-wrap">
       <form className="card login-card" onSubmit={submit}>
         <h1>PromptStat</h1>
-        <p className="muted">Вопрос на русском — таблица и график из вашей базы</p>
+        <p className="muted">Запрос на русском — таблица и график из вашей базы</p>
         {error && <div className="alert">{error}</div>}
         <label>
           Email
